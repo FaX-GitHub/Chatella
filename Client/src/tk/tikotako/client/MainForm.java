@@ -12,10 +12,15 @@
 
 package tk.tikotako.client;
 
+import javax.swing.*;
+
 /**
- * Created by ^-_-^ on 25/04/2017 @ 15:27.
+ * Created by ^-_-^ on 25/04/2017 @ 23:50.
  **/
 
-public class ChatellaClientSocket
+public class MainForm
 {
+    private JPanel panel1;
+    private JEditorPane anAwesomeStringWithEditorPane;
+    private JTextArea anAwesomeStringWithTextArea;
 }

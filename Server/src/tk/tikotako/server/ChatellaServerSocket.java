@@ -10,9 +10,7 @@
  *
  */
 
-package tk.tikotako.server;
-
-import java.util.logging.Logger;
+package tk.tikotako.server;import java.util.logging.Logger;
 
 import static tk.tikotako.utils.Utils.*;
 
@@ -31,6 +29,5 @@ public class ChatellaServerSocket
        LOG.log(L_INF, "Y HALO THAR");
 
     }
-
 
 }

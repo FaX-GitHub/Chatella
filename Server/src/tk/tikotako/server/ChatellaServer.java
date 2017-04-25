@@ -10,14 +10,11 @@
  *
  */
 
-package tk.tikotako.server;
-
+package tk.tikotako.server;import static tk.tikotako.utils.Utils.*;
 import tk.tikotako.utils.logger.TheLogger;
 
-import java.util.Arrays;
 import java.util.logging.Logger;
 
-import static tk.tikotako.utils.Utils.*;
 
 /**
  * Created by ^-_-^ on 25/04/2017 @ 18:15.
@@ -33,7 +30,7 @@ public class ChatellaServer
         TheLogger.start(CONSOLE);
         LOG.log(L_INF, "Y HALO THAR CONSOLE");
         (new ChatellaServerSocket()).doSomeThingAndLog();
-        try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(L_ERR, Arrays.toString(e.getStackTrace()), e); }
+        try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(L_ERR, null, e); }
 
 
         try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
@@ -41,13 +38,13 @@ public class ChatellaServer
         TheLogger.start(FILE);
         LOG.log(L_INF, "Y HALO THAR CONSOLE + FILE");
         (new ChatellaServerSocket()).doSomeThingAndLog();
-        try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(L_ERR, Arrays.toString(e.getStackTrace()), e); }
+        try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(L_ERR, null, e); }
 
         try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
         System.out.println("CONSOLE OFF");
         TheLogger.stop(CONSOLE);
         LOG.log(L_INF, "Y HALO THAR FILE");
         (new ChatellaServerSocket()).doSomeThingAndLog();
-        try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(L_ERR, Arrays.toString(e.getStackTrace()), e); }
+        try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(L_ERR, null, e); }
     }
 }

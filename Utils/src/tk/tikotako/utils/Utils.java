@@ -13,6 +13,7 @@
 package tk.tikotako.utils;
 
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by ^-_-^ on 25/04/2017 @ 19:42.
@@ -20,6 +21,8 @@ import java.util.logging.Level;
 
 public class Utils
 {
+    private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
     public final static Level L_ERR = Level.SEVERE;
     public final static Level L_INF = Level.INFO;
     public final static Level L_WAR = Level.WARNING;

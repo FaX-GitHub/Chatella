@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /**
@@ -38,7 +37,7 @@ class TheFormatter extends Formatter
                     rec.getSourceClassName() + "\r\n\t" +
                     rec.getSourceMethodName() + "\r\n\t" +
                     rec.getMessage() + "\r\n\t" +
-                    rec.getThrown() + "\r\n";
+                    ((rec.getThrown() != null) ? Arrays.toString(rec.getThrown().getStackTrace()) : "null") + "\r\n";
     }
 
     private String calcDate(long millisecs)
@@ -52,13 +51,13 @@ class TheFormatter extends Formatter
     // formatter is created
     public String getHead(Handler h)
     {
-        return "LOGGIN' START " + calcDate(System.currentTimeMillis()) + "\r\n";
+        return "\t\t\t\t\t ********** LOGGIN' START " + calcDate(System.currentTimeMillis()) + " **********\r\n";
     }
 
     // this method is called just after the handler using this
     // formatter is closed
     public String getTail(Handler h)
     {
-        return "LOGGIN' END " + calcDate(System.currentTimeMillis()) + "\r\n\r\n";
+        return "\t\t\t\t\t ********** LOGGIN' END " + calcDate(System.currentTimeMillis()) + " ********** \r\n\r\n";
     }
 }
