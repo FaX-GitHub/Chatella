@@ -13,6 +13,7 @@
 package tk.tikotako.utils.logger;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -32,24 +33,13 @@ class TheFormatter extends Formatter
     // this method is called for every log records
     public String format(LogRecord rec)
     {
-        StringBuilder buf = new StringBuilder(1000);
 
-        buf.append(rec.getLevel());
-        buf.append("\t");
-        buf.append(calcDate(rec.getMillis()));
-        buf.append("\r\n\t");
-        buf.append(rec.getSourceClassName());
-        buf.append("\r\n\t");
-        buf.append(rec.getSourceMethodName());
-        buf.append("\r\n\t");
-        buf.append(rec.getMessage());
-        buf.append("\r\n\t");
-        buf.append(rec.getParameters());
-        buf.append("\r\n\t");
-        buf.append(rec.getThrown());
-        buf.append("\r\n");
-
-        return buf.toString();
+        return String.valueOf(
+                    rec.getLevel()) + "\t" + calcDate(rec.getMillis()) + "\r\n\t" +
+                    rec.getSourceClassName() + "\r\n\t" +
+                    rec.getSourceMethodName() + "\r\n\t" +
+                    rec.getMessage() + "\r\n\t" +
+                    rec.getThrown() + "\r\n";
     }
 
     private String calcDate(long millisecs)

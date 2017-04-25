@@ -12,9 +12,14 @@
 
 package tk.tikotako.utils.logger;
 
+import tk.tikotako.server.ChatellaServer;
+import tk.tikotako.server.ChatellaServerSocket;
+
+import java.io.Console;
 import java.io.File;
-import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.*;
 
@@ -28,40 +33,84 @@ import java.util.logging.*;
 
 public class TheLogger
 {
-    static private FileHandler fileTxt;
-    static private TheFormatter formatterTxt;
 
-    static public void setup()
+    static private void disableLog(Handler _wich)
     {
+        // suppress the logging output to the console
+        Logger rootLogger = Logger.getLogger("");
+        Handler[] handlers = rootLogger.getHandlers();
+        System.out.println(Arrays.toString(handlers));
+        if (_wich.getClass().isInstance(handlers[0]))
+        {
+            rootLogger.removeHandler(handlers[0]);
+            System.out.println("brb " + _wich);
+        }   else
+        {
+            System.out.println("WUT " + _wich);
+        }
+    }
+
+    private static void enableLogConsole()
+    {
+        // get the global logger to configure it
+        Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+        logger.setLevel(Level.ALL);
+        logger.addHandler(new ConsoleHandler());
+        System.out.println("HALO CONZOL");
+
+    }
+
+    static private void enableLogToFile()
+    {
+        // get the global logger to configure it
+        Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
         try
         {
-            // get the global logger to configure it
-            Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+            //noinspection ResultOfMethodCallIgnored
+            new File("Log").mkdir(); // r ignored (true, false)
 
-            // suppress the logging output to the console
-            Logger rootLogger = Logger.getLogger("");
-            Handler[] handlers = rootLogger.getHandlers();
-
-            if (handlers[0] instanceof ConsoleHandler)
-            {
-                rootLogger.removeHandler(handlers[0]);
-            }
-
-            logger.setLevel(Level.ALL);
-
-            new File("Log").mkdir();
-
-            fileTxt = new FileHandler("Log\\" +
-                                        (new SimpleDateFormat("dd-MM-yyyy")).format(new Date(System.currentTimeMillis())) +
-                                        ".txt", true);
+            FileHandler fileTxt = new FileHandler("Log\\" + (new SimpleDateFormat("dd-MM-yyyy")).format(new Date(System.currentTimeMillis())) + ".txt", true);
 
             // create a TXT formatter
-            formatterTxt = new TheFormatter();
+            TheFormatter formatterTxt = new TheFormatter();
             fileTxt.setFormatter(formatterTxt);
+
+            logger.setLevel(Level.ALL);
             logger.addHandler(fileTxt);
         }   catch (Exception e)
         {
             e.printStackTrace();
         }
     }
+
+    static public void start()
+    {
+
+        enableLogToFile();
+
+        Logger rootLogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+        Handler[] handlers = rootLogger.getHandlers();
+        System.out.println(Arrays.toString(handlers));
+
+        disableLog(new ConsoleHandler());
+
+        handlers = rootLogger.getHandlers();
+        System.out.println(Arrays.toString(handlers));
+    }
+
+    static public void stop(boolean _switchToConsole)
+    {
+        if (_switchToConsole) enableLogConsole();
+        try
+        {
+            disableLog(new FileHandler());
+        }   catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+
 }

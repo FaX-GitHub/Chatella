@@ -12,9 +12,9 @@
 
 package tk.tikotako.server;
 
-import tk.tikotako.utils.logger.TheLogger;
+import java.util.logging.Logger;
 
-import java.util.logging.*;
+import static tk.tikotako.utils.Utils.*;
 
 /**
  * Created by ^-_-^ on 25/04/2017 @ 15:26.
@@ -22,34 +22,15 @@ import java.util.logging.*;
 
 public class ChatellaServerSocket
 {
-    // use the classname for the logger, this way you can refactor
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-
-    public void doSomeThingAndLog() {
+   public void doSomeThingAndLog() {
         // ... more code
 
         // now we demo the logging
-
-
-        LOG.severe("Info Logsevere");
-        LOG.warning("Info Logwarning");
-        LOG.info("Info Loginfo");
-        LOG.finest("Really not important");
+       LOG.log(L_INF, "Y HALO THAR");
 
     }
 
-    public static void main(String[] args)
-    {
-        TheLogger.setup();
-        (new ChatellaServerSocket()).doSomeThingAndLog();
 
-        try
-        {
-            int i = Integer.parseInt("potato");
-        }   catch (Exception e)
-        {
-            LOG.log(Level.SEVERE, "derp", e);
-        }
-    }
 }
