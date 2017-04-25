@@ -22,9 +22,8 @@ import java.util.logging.LogRecord;
 
 /**
  * Created by ^-_-^ on 25/04/2017 @ 16:39.
- **/
-
-/**
+ *
+ *
  * Modified copypasta from http://www.vogella.com/tutorials/Logging/article.html
  */
 
@@ -53,13 +52,13 @@ class TheFormatter extends Formatter
     // formatter is created
     public String getHead(Handler h)
     {
-        return "LOGGIN START " + calcDate(System.currentTimeMillis()) + "\r\n";
+        return "LOGGIN' START " + calcDate(System.currentTimeMillis()) + "\r\n";
     }
 
     // this method is called just after the handler using this
     // formatter is closed
     public String getTail(Handler h)
     {
-        return "LOGGIN END " + calcDate(System.currentTimeMillis()) + "\r\n\r\n";
+        return "LOGGIN' END " + calcDate(System.currentTimeMillis()) + "\r\n\r\n";
     }
 }

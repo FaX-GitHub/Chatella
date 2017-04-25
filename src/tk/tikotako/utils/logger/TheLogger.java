@@ -12,41 +12,41 @@
 
 package tk.tikotako.utils.logger;
 
-import tk.tikotako.server.ChatellaServer;
-import tk.tikotako.server.ChatellaServerSocket;
-
-import java.io.Console;
 import java.io.File;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.*;
 
-/**
- * Created by ^-_-^ on 25/04/2017 @ 16:27.
- **/
+import static tk.tikotako.utils.Utils.*;
 
 /**
- *  Modified copypasta from http://www.vogella.com/tutorials/Logging/article.html
+ * Created by ^-_-^ on 25/04/2017 @ 16:27.
+ * <p>
+ * <p>
+ * Modified copypasta from http://www.vogella.com/tutorials/Logging/article.html
  */
 
 public class TheLogger
 {
-
-    static private void disableLog(Handler _wich)
+    static private void disableLog(Class _wich)
     {
-        // suppress the logging output to the console
-        Logger rootLogger = Logger.getLogger("");
-        Handler[] handlers = rootLogger.getHandlers();
-        System.out.println(Arrays.toString(handlers));
-        if (_wich.getClass().isInstance(handlers[0]))
+        Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+        if (logger.getHandlers().length > 0)
         {
-            rootLogger.removeHandler(handlers[0]);
-            System.out.println("brb " + _wich);
-        }   else
-        {
-            System.out.println("WUT " + _wich);
+            for (Handler _handler : logger.getHandlers())
+            {
+                try
+                {
+                    if (_wich.isInstance(_handler))
+                    {
+                        logger.removeHandler(_handler);
+                        return;
+                    }
+                } catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -56,15 +56,12 @@ public class TheLogger
         Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
         logger.setLevel(Level.ALL);
         logger.addHandler(new ConsoleHandler());
-        System.out.println("HALO CONZOL");
-
     }
 
     static private void enableLogToFile()
     {
         // get the global logger to configure it
         Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-
         try
         {
             //noinspection ResultOfMethodCallIgnored
@@ -78,39 +75,58 @@ public class TheLogger
 
             logger.setLevel(Level.ALL);
             logger.addHandler(fileTxt);
-        }   catch (Exception e)
+        } catch (Exception e)
         {
             e.printStackTrace();
         }
     }
 
-    static public void start()
+    static public void start(int _ConsoleOrFile)
     {
-
-        enableLogToFile();
-
-        Logger rootLogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-
-        Handler[] handlers = rootLogger.getHandlers();
-        System.out.println(Arrays.toString(handlers));
-
-        disableLog(new ConsoleHandler());
-
-        handlers = rootLogger.getHandlers();
-        System.out.println(Arrays.toString(handlers));
-    }
-
-    static public void stop(boolean _switchToConsole)
-    {
-        if (_switchToConsole) enableLogConsole();
-        try
+        // TODO: check if there is already the console/file output so don't add another one
+        Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).setUseParentHandlers(false);
+        switch (_ConsoleOrFile)
         {
-            disableLog(new FileHandler());
-        }   catch (Exception e)
-        {
-            e.printStackTrace();
+            case CONSOLE:
+            {
+                enableLogConsole();
+                break;
+            }
+            case FILE:
+            {
+                enableLogToFile();
+                break;
+            }
+            case CONFILE:
+            {
+                enableLogConsole();
+                enableLogToFile();
+                break;
+            }
         }
     }
 
+    static public void stop(int _ConsoleOrFile)
+    {
+        switch (_ConsoleOrFile)
+        {
+            case CONSOLE:
+            {
+                disableLog(ConsoleHandler.class);
+                break;
+            }
+            case FILE:
+            {
+                disableLog(FileHandler.class);
+                break;
+            }
+            case CONFILE:
+            {
+                disableLog(ConsoleHandler.class);
+                disableLog(FileHandler.class);
+                break;
+            }
+        }
+    }
 
 }

@@ -24,4 +24,7 @@ public class Utils
     public final static Level L_INF = Level.INFO;
     public final static Level L_WAR = Level.WARNING;
 
+    public final static int CONSOLE = 9001;
+    public final static int FILE    = 9002;
+    public final static int CONFILE = 9003;
 }

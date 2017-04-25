@@ -29,28 +29,25 @@ public class ChatellaServer
 
     public static void main(String[] args)
     {
-
-        TheLogger.start();
+        System.out.println("CONSOLE ON");
+        TheLogger.start(CONSOLE);
+        LOG.log(L_INF, "Y HALO THAR CONSOLE");
         (new ChatellaServerSocket()).doSomeThingAndLog();
-
-        try
-        {
-            int i = Integer.parseInt("potato");
-        } catch (Exception e)
-        {
-            LOG.log(L_ERR, Arrays.toString(e.getStackTrace()), e);
-        }
+        try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(L_ERR, Arrays.toString(e.getStackTrace()), e); }
 
 
-        TheLogger.stop(true);
+        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+        System.out.println("FILE ON");
+        TheLogger.start(FILE);
+        LOG.log(L_INF, "Y HALO THAR CONSOLE + FILE");
         (new ChatellaServerSocket()).doSomeThingAndLog();
+        try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(L_ERR, Arrays.toString(e.getStackTrace()), e); }
 
-        try
-        {
-            int i = Integer.parseInt("potato");
-        } catch (Exception e)
-        {
-            LOG.log(L_ERR, Arrays.toString(e.getStackTrace()), e);
-        }
+        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+        System.out.println("CONSOLE OFF");
+        TheLogger.stop(CONSOLE);
+        LOG.log(L_INF, "Y HALO THAR FILE");
+        (new ChatellaServerSocket()).doSomeThingAndLog();
+        try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(L_ERR, Arrays.toString(e.getStackTrace()), e); }
     }
 }
