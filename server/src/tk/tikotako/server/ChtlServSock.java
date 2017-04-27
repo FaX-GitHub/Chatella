@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  * Created by ^-_-^ on 25/04/2017 @ 15:26.
  **/
 
-class ChatellaServerSocket
+class ChtlServSock
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 

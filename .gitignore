@@ -236,3 +236,4 @@ local.properties
 .cache-main
 .scala_dependencies
 .worksheet
+/server/src/tk/tikotako/server/prova.java

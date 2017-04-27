@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  * Created by ^-_-^ on 25/04/2017 @ 18:15.
  **/
 
-public class ChatellaServer
+public class Console
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -31,7 +31,7 @@ public class ChatellaServer
         System.out.println("CONSOLE ON");
         TheLogger.start(Utils.CONSOLE);
         LOG.log(Utils.L_INF, "Y HALO THAR CONSOLE");
-        (new ChatellaServerSocket()).doSomeThingAndLog();
+        (new ChtlServSock()).doSomeThingAndLog();
         try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(Utils.L_ERR, null, e); }
 
 
@@ -39,14 +39,14 @@ public class ChatellaServer
         System.out.println("FILE ON");
         TheLogger.start(Utils.FILE);
         LOG.log(Utils.L_INF, "Y HALO THAR CONSOLE + FILE");
-        (new ChatellaServerSocket()).doSomeThingAndLog();
+        (new ChtlServSock()).doSomeThingAndLog();
         try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(Utils.L_ERR, null, e); }
 
         try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
         System.out.println("CONSOLE OFF");
         TheLogger.stop(Utils.CONSOLE);
         LOG.log(Utils.L_INF, "Y HALO THAR FILE");
-        (new ChatellaServerSocket()).doSomeThingAndLog();
+        (new ChtlServSock()).doSomeThingAndLog();
         try { int i = Integer.parseInt("potato"); } catch (Exception e) { LOG.log(Utils.L_ERR, null, e); }
     }
 }

@@ -1,4 +1,4 @@
-Chatella Project
+![LOGO](Res/Logo/150x150.png "LOGO") Chatella Project 
 ==============
 
 <h4>Chatella is an open-source IM tk.tikotako.client/server written in java.</h4>
