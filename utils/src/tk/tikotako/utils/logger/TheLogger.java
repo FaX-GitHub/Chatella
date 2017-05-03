@@ -67,9 +67,9 @@ public class TheLogger
         try
         {
             //noinspection ResultOfMethodCallIgnored
-            new File("Log").mkdir(); // r ignored (true, false)
+            new File("Logs").mkdir(); // r ignored (true, false)
 
-            FileHandler fileTxt = new FileHandler("Log\\" + (new SimpleDateFormat("dd-MM-yyyy")).format(new Date(System.currentTimeMillis())) + ".txt", true);
+            FileHandler fileTxt = new FileHandler("Logs\\" + (new SimpleDateFormat("dd-MM-yyyy")).format(new Date(System.currentTimeMillis())) + ".txt", true);
 
             // create a TXT formatter
             TheFormatter formatterTxt = new TheFormatter();

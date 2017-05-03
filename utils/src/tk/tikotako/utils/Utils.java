@@ -12,6 +12,8 @@
 
 package tk.tikotako.utils;
 
+import javax.swing.*;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,4 +32,20 @@ public class Utils
     public final static int CONSOLE = 9001;
     public final static int FILE    = 9002;
     public final static int CONFILE = 9003;
+
+    public final static int nullint = -1;
+
+    public final static String cEXIT = "acExit";
+    public final static String cSTART= "acStart";
+    public final static String cSTOP= "acStop";
+    public final static String cLOGDIR = "acLogDir";
+    public final static String cNULL = "-";
+    public final static String cHELP = "acHalpMiCarPliz";
+    public final static String cABOUT = "acAbbabbebebebbebbaechebabachubebbe";
+
+    public static void errorMessage(Exception e)
+    {
+        ImageIcon ico = new ImageIcon(Utils.class.getClass().getResource("/img/error.png"));
+        JOptionPane.showMessageDialog(null, e.getMessage(),"ERROR."+e.getMessage(), JOptionPane.ERROR_MESSAGE, ico);
+    }
 }

@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Name: tk/tikotako/server/
 Main-Class: tk.tikotako.server.MainForm
 SplashScreen-Image: img/loading.gif
 Specification-Title: Chatella Server
