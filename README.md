@@ -1,7 +1,7 @@
-![LOGO](Res/Logo/150x150.png "LOGO") Chatella Project 
+![LOGO](ReadmeLogo.png "LOGO") Chatella Project 
 ==============
 
-<h4>Chatella is an open-source IM tk.tikotako.client/server written in java.</h4>
+<h4>Chatella is an open-source IM client/server written in java.</h4>
 
 **IRC-LIKE STUFF**
 - No need to register to chat.

@@ -2,9 +2,13 @@ package tk.tikotako.server;
 
 import java.awt.*;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
 import javax.swing.*;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import java.awt.event.WindowEvent;
@@ -15,6 +19,8 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
 import tk.tikotako.utils.Utils;
+
+import static tk.tikotako.server.MainForm.*;
 import static tk.tikotako.utils.Utils.*;
 
 /**
@@ -43,6 +49,45 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
         refLeTree = leTree;
 
         initialized = true;
+    }
+
+    private void saveOptions()
+    {
+        // saving data
+        Properties p = new Properties();
+        MainForm.StuffToSave stuff = ((MainForm)this).getWindowData();
+        p.setProperty("windowX", Integer.toString(stuff.windowPosition[0]));
+        p.setProperty("windowY", Integer.toString(stuff.windowPosition[1]));
+        p.setProperty("ip", stuff.ip);
+        p.setProperty("port", stuff.port);
+        p.setProperty("mtod", stuff.mtod);
+        try
+        {
+            p.store(new FileWriter("Server.properties", false), "Chatella Server v " + chatellaVersion);
+        } catch (IOException e1)
+        {
+            e1.printStackTrace();
+        }
+    }
+
+    private void loadOptions()
+    {
+        // load data
+        Properties p = new Properties();
+        StuffToSave stuff = new StuffToSave(((MainForm)this)); // derp
+        try
+        {
+            p.load(new FileReader("Server.properties"));
+        } catch (IOException e)
+        {
+            // FileNotFoundException lets ignore it
+        }
+        stuff.windowPosition[0] = Integer.parseUnsignedInt(p.getProperty("windowX", "9001"));
+        stuff.windowPosition[1] = Integer.parseUnsignedInt(p.getProperty("windowY", "9001"));
+        stuff.ip = p.getProperty("ip", "0.0.0.0");
+        stuff.port = p.getProperty("port", "55561");
+        stuff.mtod = p.getProperty("mtod", "Chatella Server [v " + MainForm.chatellaVersion + "]\r\nWelcome to Chatella network.");
+        ((MainForm)this).setWindowData(stuff);
     }
 
     // ****************************  ActionListener ++
@@ -90,6 +135,7 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
                 }
                 // want to close
                 ((MainForm)this).stopServer();
+                saveOptions();
                 System.exit(0);
                 break;
             }
@@ -123,6 +169,7 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
     public void windowOpened(WindowEvent e)
     {
         // TODO add load config
+        loadOptions();
     }
 
     /**

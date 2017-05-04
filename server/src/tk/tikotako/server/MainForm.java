@@ -3,6 +3,8 @@ package tk.tikotako.server;
 import java.awt.*;
 import java.net.URL;
 import javax.swing.*;
+import java.text.Format;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -30,14 +32,56 @@ public class MainForm extends ListenerManager
     private JPanel infoPanel;
     private JLabel leLabel;
     private JPanel manServerPanel;
-    private JPanel Sud;
-    private JPanel Centro;
+    private JPanel centerPanel;
     private JToolBar leToolBar;
     private JEditorPane InfoEditorPanel;
     private JMenuBar menuBar;
     private JPanel mainPanel;
     private JPanel cardContainer;
     private JTree leTree;
+    private JPanel statusPanel;
+    private JSpinner portSpinner;
+    private JTextField ipField;
+    private JTextArea motdArea;
+    private JFrame mainWindow;
+
+    static class StuffToSave
+    {
+        int [] windowPosition;
+        String ip, port, mtod;
+
+        StuffToSave(MainForm who)
+        {
+            windowPosition =  new int [] { 9001, 9001 };
+            if (who.mainWindow.isShowing())
+            {
+                windowPosition =  new int [] { (int)who.mainWindow.getLocation().getX(), (int)who.mainWindow.getLocation().getY() };
+            }
+            port = who.portSpinner.getValue().toString();
+            ip = who.ipField.getText();
+            mtod = who.motdArea.getText();
+        }
+    }
+
+    StuffToSave getWindowData()
+    {
+        return new StuffToSave(this);
+    }
+
+    void setWindowData(StuffToSave loadedStuff)
+    {
+        motdArea.setText(loadedStuff.mtod);
+        ipField.setText(loadedStuff.ip);
+        portSpinner.setValue(Integer.valueOf(loadedStuff.port));
+
+        if ((loadedStuff.windowPosition[0] != 9001) && (loadedStuff.windowPosition[1] != 9001))
+        {
+            mainWindow.setLocation(loadedStuff.windowPosition[0], loadedStuff.windowPosition[1]);
+        } else
+        {
+            mainWindow.setLocationRelativeTo(null);
+        }
+    }
 
     private MainForm()
     {
@@ -47,7 +91,7 @@ public class MainForm extends ListenerManager
         // Show loading image, is set in the build jar option page and the manifest file
         SplashScreen.getSplashScreen();
 
-        JFrame mainWindow = makeMainWindow(this, mainPanel, menuBar);
+        mainWindow = makeMainWindow(this, mainPanel, menuBar);
         changeLookAndFeel(mainWindow);
         setupListener(cardContainer, leTree); // ListenerManager
     }
@@ -72,6 +116,10 @@ public class MainForm extends ListenerManager
         leTree = UserInterfaceStuff.leTreeSetup(this);
         menuBar = UserInterfaceStuff.standardMenuSetup(this);
         leToolBar = UserInterfaceStuff.leToolBarSetup(this);
+
+        portSpinner = new JSpinner();
+        ipField = new JTextField();
+        motdArea = new JTextArea();
 
         // setup the Info panel with an HTML and hyperlink event listener
         InfoEditorPanel = new JEditorPane();

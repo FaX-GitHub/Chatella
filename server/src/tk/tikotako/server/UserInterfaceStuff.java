@@ -23,11 +23,11 @@ class UserInterfaceStuff
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    // leTree
+    // leTree strings
     private static String sRoot, sManage, sServer, sUser, sChannels, sLogs, sLogs2, sServer2, sInfo;
-    // Menu
+    // Menu strings
     private static String mFile, mExit, mHelp, mAbout;
-    // leToolBar
+    // leToolBar strings
     private static String tStartCap, tStopCap, tLogsCap, tExitCap, tStartTip, tStopTip, tLogsTip, tExitTip;
 
     static void loadLocalized()
@@ -59,6 +59,7 @@ class UserInterfaceStuff
         tLogsTip = myResources.getString("ButtonLogDirToolTip");
         tExitTip = myResources.getString("ButtonExitToolTip");
     }
+
     static void changeLookAndFeel(JFrame mainWindow)
     {
         UIManager.LookAndFeelInfo looks[] = UIManager.getInstalledLookAndFeels();
@@ -87,7 +88,7 @@ class UserInterfaceStuff
         mainWindow.setIconImage(ico.getImage());
         mainWindow.pack();
 
-        mainWindow.setLocationRelativeTo(null);
+        mainWindow.setResizable(false);
         mainWindow.setVisible(true);
 
         return mainWindow;
