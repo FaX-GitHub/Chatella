@@ -1,26 +1,17 @@
 package tk.tikotako.server;
 
-import tk.tikotako.utils.Utils;
-import tk.tikotako.utils.logger.TheLogger;
-
+import java.awt.*;
+import java.net.URL;
 import javax.swing.*;
+import java.util.logging.Logger;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
-import java.awt.*;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.URL;
-import java.util.logging.Logger;
 
 import static tk.tikotako.server.UserInterfaceStuff.changeLookAndFeel;
 import static tk.tikotako.server.UserInterfaceStuff.makeMainWindow;
 import static tk.tikotako.utils.Utils.errorMessage;
-import static tk.tikotako.server.ServerLogStream.*;
+import tk.tikotako.utils.logger.TheLogger;
+import tk.tikotako.utils.Utils;
 
 /**
  * Created by ^-_-^ on 27/04/2017 @ 20:37.
@@ -28,31 +19,43 @@ import static tk.tikotako.server.ServerLogStream.*;
 
 public class MainForm extends ListenerManager
 {
+    // Const
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     final static String chatellaVersion = "1.0";
 
-    private JPanel manUsersPanel;
-    private JPanel manChannelsPanel;
-    private JPanel manLogsPanel;
-    private JPanel logServerPanel;
-    private JPanel infoPanel;
-    private JLabel leLabel;
-    private JPanel manServerPanel;
-    private JPanel centerPanel;
-    private JToolBar leToolBar;
-    private JEditorPane InfoEditorPanel;
+    // UI
+    private JFrame mainWindow;
+    private JTree leTree;
     private JMenuBar menuBar;
+    private JToolBar leToolBar;
+
+    private JPanel centerPanel;
+    private JPanel statusPanel;
+    private JLabel leLabel;
     private JPanel mainPanel;
     private JPanel cardContainer;
-    private JTree leTree;
-    private JPanel statusPanel;
-    private JSpinner portSpinner;
+
+    private JPanel manServerPanel;
     private JTextField ipField;
+    private JSpinner portSpinner;
     private JTextArea motdArea;
     private JCheckBox closeToTrayCheckBox;
-    private JTextPane logOutput;
     private JCheckBox logToFileCheckBox;
-    private JFrame mainWindow;
+
+    private JPanel manUsersPanel;
+
+    private JPanel manChannelsPanel;
+
+    private JPanel manLogsPanel;
+
+    private JPanel logServerPanel;
+    private JTextPane logOutput;
+
+    private JPanel infoPanel;
+    private JEditorPane InfoEditorPanel;
+
+    // Others
+    ServerLog serverLog;
 
     // ****************************  Get & set ++
 
@@ -151,10 +154,7 @@ public class MainForm extends ListenerManager
 
     public static void main(String[] args)
     {
-        javax.swing.SwingUtilities.invokeLater(() ->
-        {
-            MainForm mf = new MainForm();
-        });
+        javax.swing.SwingUtilities.invokeLater(MainForm::new);
     }
 
     void startServer()
@@ -185,24 +185,9 @@ public class MainForm extends ListenerManager
         ipField = new JTextField();
         motdArea = new JTextArea();
 
-        System.out.printf("%s", "HURRRRRRRRRRRRR");
         logOutput = new JTextPane();
         logOutput.setEditable(false);
-
-        System.setOut(new PrintStream(new ServerLogStream(logOutput, true)));
-        System.setErr(new PrintStream(new ServerLogStream(logOutput, false)));
-
-        doLogToFile(true);
-        log("%s %d %s", "PIZZA", 1234, "\r\n");
-        err("MANDOLINO\r\n");
-
-        doLogToFile(false);
-        err("PIZZA 2\r\n");
-        err("MANDOLINO 2\r\n");
-
-        doLogToFile(true);
-        log( "PIZZA 3\r\n");
-        err("MANDOLINO 3\r\n");
+        serverLog = new ServerLog(logOutput);
 
         // setup the Info panel with an HTML and hyperlink event listener
         InfoEditorPanel = new JEditorPane();

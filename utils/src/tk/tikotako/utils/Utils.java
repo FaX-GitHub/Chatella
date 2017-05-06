@@ -34,6 +34,8 @@ public class Utils
 
     public enum LogType { CONSOLE, FILE, CONFILE };
 
+    public enum ServerLogType { NORMAL, ERROR };
+
     public enum ActionCommands
     {
         FAIL ("acFAIL"),
