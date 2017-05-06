@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.logging.*;
 
 import static tk.tikotako.utils.Utils.*;
+import static tk.tikotako.utils.Utils.LogType.*;
 
 /**
  * Created by ^-_-^ on 25/04/2017 @ 16:27.
@@ -67,9 +68,9 @@ public class TheLogger
         try
         {
             //noinspection ResultOfMethodCallIgnored
-            new File("Log").mkdir(); // r ignored (true, false)
+            new File("Logs").mkdir(); // r ignored (true, false)
 
-            FileHandler fileTxt = new FileHandler("Log\\" + (new SimpleDateFormat("dd-MM-yyyy")).format(new Date(System.currentTimeMillis())) + ".txt", true);
+            FileHandler fileTxt = new FileHandler("Logs\\" + (new SimpleDateFormat("dd-MM-yyyy")).format(new Date(System.currentTimeMillis())) + ".txt", true);
 
             // create a TXT formatter
             TheFormatter formatterTxt = new TheFormatter();
@@ -83,7 +84,7 @@ public class TheLogger
         }
     }
 
-    static public void start(int _ConsoleOrFile)
+    static public void start(LogType _ConsoleOrFile)
     {
         // TODO: check if there is already the console/file output so don't add another one
         Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).setUseParentHandlers(false);
@@ -108,7 +109,7 @@ public class TheLogger
         }
     }
 
-    static public void stop(int _ConsoleOrFile)
+    static public void stop(LogType _ConsoleOrFile)
     {
         switch (_ConsoleOrFile)
         {

@@ -23,4 +23,14 @@ public class MainForm
     private JPanel panel1;
     private JEditorPane anAwesomeStringWithEditorPane;
     private JTextArea anAwesomeStringWithTextArea;
+
+    public static void main(String[] args)
+    {
+        JFrame frame = new JFrame("MainForm");
+        frame.setContentPane(new MainForm().panel1);
+        //noinspection MagicConstant
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
+    }
 }

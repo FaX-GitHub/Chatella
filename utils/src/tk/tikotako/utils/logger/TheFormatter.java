@@ -12,11 +12,11 @@
 
 package tk.tikotako.utils.logger;
 
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.logging.Formatter;
+import java.util.Arrays;
 import java.util.logging.Handler;
+import java.text.SimpleDateFormat;
+import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
 /**
@@ -31,7 +31,6 @@ class TheFormatter extends Formatter
     // this method is called for every log records
     public String format(LogRecord rec)
     {
-
         return String.valueOf(
                     rec.getLevel()) + "\t" + calcDate(rec.getMillis()) + "\r\n\t" +
                     rec.getSourceClassName() + "\r\n\t" +

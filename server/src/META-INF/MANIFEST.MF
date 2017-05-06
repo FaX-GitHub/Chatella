@@ -1,3 +1,7 @@
 Manifest-Version: 1.0
-Main-Class: tk.tikotako.server.ChatellaServer
-
+Name: tk/tikotako/server/
+Main-Class: tk.tikotako.server.MainForm
+SplashScreen-Image: img/loading.gif
+Specification-Title: Chatella Server
+Specification-Version: 1.0
+Specification-Vendor: TikoTako
