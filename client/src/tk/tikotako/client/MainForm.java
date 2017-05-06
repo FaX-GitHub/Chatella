@@ -28,6 +28,7 @@ public class MainForm
     {
         JFrame frame = new JFrame("MainForm");
         frame.setContentPane(new MainForm().panel1);
+        //noinspection MagicConstant
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);

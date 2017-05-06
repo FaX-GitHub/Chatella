@@ -12,8 +12,8 @@ import javax.swing.tree.TreeSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import tk.tikotako.utils.Utils;
 import static tk.tikotako.utils.Utils.*;
+import tk.tikotako.utils.Utils;
 
 /**
  * Created by ^-_-^ on 01/05/2017 @ 23:54.
@@ -22,6 +22,8 @@ import static tk.tikotako.utils.Utils.*;
 class UserInterfaceStuff
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+    private static boolean Loaded = false;
 
     // leTree strings
     private static String sRoot, sManage, sServer, sUser, sChannels, sLogs, sLogs2, sServer2, sInfo;
@@ -32,6 +34,11 @@ class UserInterfaceStuff
 
     static void loadLocalized()
     {
+        if (Loaded)
+        {
+            return;
+        }
+        Loaded = true;
         // Load localized strings
         ResourceBundle myResources = ResourceBundle.getBundle("localization", Locale.getDefault());
         // leTree
@@ -45,19 +52,19 @@ class UserInterfaceStuff
                 sServer2 = myResources.getString("sServer2");
             sInfo = myResources.getString("sInfo");
         // menu
-        mFile = myResources.getString("mFile");
-            mExit = myResources.getString("mExit");
-        mHelp = myResources.getString("mHelp");
-            mAbout = myResources.getString("mAbout");
+        mFile = myResources.getString("M_File");
+            mExit = myResources.getString("M_Exit");
+        mHelp = myResources.getString("M_Help");
+            mAbout = myResources.getString("M_About");
         // leToolBar
-        tStartCap = myResources.getString("ButtonStart");
-        tStopCap = myResources.getString("ButtonStop");
-        tLogsCap = myResources.getString("ButtonLogDir");
-        tExitCap = myResources.getString("ButtonExit");
-        tStartTip = myResources.getString("ButtonStartToolTip");
-        tStopTip = myResources.getString("ButtonStopToolTip");
-        tLogsTip = myResources.getString("ButtonLogDirToolTip");
-        tExitTip = myResources.getString("ButtonExitToolTip");
+        tStartCap = myResources.getString("B_Start");
+        tStopCap = myResources.getString("B_Stop");
+        tLogsCap = myResources.getString("B_LogDir");
+        tExitCap = myResources.getString("B_Exit");
+        tStartTip = myResources.getString("B_StartToolTip");
+        tStopTip = myResources.getString("B_StopToolTip");
+        tLogsTip = myResources.getString("B_LogDirToolTip");
+        tExitTip = myResources.getString("B_ExitToolTip");
     }
 
     static void changeLookAndFeel(JFrame mainWindow)
@@ -73,13 +80,13 @@ class UserInterfaceStuff
         }
     }
 
-    static JFrame makeMainWindow(MainForm who, JPanel mainPanel, JMenuBar menuBar)
+    static JFrame makeMainWindow(ListenerManager listenerManager, JPanel mainPanel, JMenuBar menuBar)
     {
         JFrame mainWindow = new JFrame("Chatella server [v " + MainForm.chatellaVersion + "]");
 
         mainWindow.setJMenuBar(menuBar);
 
-        mainWindow.addWindowListener(who);
+        mainWindow.addWindowListener(listenerManager);
 
         mainWindow.setContentPane(mainPanel);
         mainWindow.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -89,7 +96,6 @@ class UserInterfaceStuff
         mainWindow.pack();
 
         mainWindow.setResizable(false);
-        mainWindow.setVisible(true);
 
         return mainWindow;
     }
@@ -98,58 +104,51 @@ class UserInterfaceStuff
      *          generate new JButtons with the respective image for the toolbar
      *          the caption and the toolTip are set in the GUI editor (values in /resource/localization)
      *
-     * @param who           is used to set the ActionCommand of the button
-     * @param imageName     the image name without the last two characters (that is "-e" for enabled images and "-d" for disabled images), extension and path
-     * @param actionCommand the ActionCommand that is sent to *who*  when the button is pressed, in the case of cNULL the parameter is used to set the button disabled.
-     * @return              the new button
+     * @param listenerManager   is used to set the ActionCommand of the button
+     * @param imageName         the image name without the last two characters (that is "-e" for enabled images and "-d" for disabled images), extension and path
+     * @param actionCommand     the ActionCommand that is sent to *listenerManager*  when the button is pressed
+     * @param enabled           set the button state (clickable or not)
+     * @return                  the new button
      */
-    private static JButton makeButan(MainForm who, String caption, String toolTip, String imageName, String actionCommand)
+    private static JButton makeButan(ListenerManager listenerManager, String caption, String toolTip, String imageName, String actionCommand, Boolean enabled)
     {
-        //Look for the image.
-        String imgLocation = "/img/" + imageName + "-e.png";
-        URL enImageURL = UserInterfaceStuff.class.getResource(imgLocation);
-        imgLocation = "/img/" + imageName + "-d.png";
-        URL disImageURL = UserInterfaceStuff.class.getResource(imgLocation);
-
-        //Create and initialize the button.
         JButton button = new JButton();
-        if (actionCommand.equals(cNULL))
-        {
-            button.setEnabled(false);
-        } else
-        {
-            button.setActionCommand(actionCommand);
-            button.addActionListener(who);
-        }
-
         button.setText(caption);
+        button.setEnabled(enabled);
+        button.addActionListener(listenerManager);
         button.setToolTipText(toolTip);
+        button.setActionCommand(actionCommand);
 
-        if (enImageURL != null)
-        {                      //image found
-            button.setIcon(new ImageIcon(enImageURL));
-            if (disImageURL != null)
-            {
-                button.setDisabledIcon(new ImageIcon(disImageURL));
-            }
-        } else
+        if (imageName != null)
         {
-            // [MEME] impossibiru.jpg
-            LOG.log(Utils.L_ERR, "Resource not found [" + imageName + "]");
+            URL enImageURL = UserInterfaceStuff.class.getResource("/img/" + imageName + "-e.png");
+            URL disImageURL = UserInterfaceStuff.class.getResource("/img/" + imageName + "-d.png");
+
+            if (enImageURL != null)
+            {
+                button.setIcon(new ImageIcon(enImageURL));
+                if (disImageURL != null)
+                {
+                    button.setDisabledIcon(new ImageIcon(disImageURL));
+                }
+            } else
+            {
+                LOG.log(Utils.L_ERR, "Resource not found [" + imageName + "]");
+            }
         }
 
         return button;
     }
 
-    static JToolBar leToolBarSetup(MainForm who)
+    static JToolBar leToolBarSetup(ListenerManager listenerManager)
     {
         JToolBar potato = new JToolBar();
-        potato.add(makeButan(who, tStartCap, tStartTip,"start", cSTART));
-        potato.add(makeButan(who, tStopCap, tStopTip,"stop", cNULL));
+        potato.add(makeButan(listenerManager, tStartCap, tStartTip,"start", ActionCommands.START.toString(), true));
+        potato.add(makeButan(listenerManager, tStopCap, tStopTip,"stop", ActionCommands.STOP.toString(), false));
         potato.addSeparator();
-        potato.add(makeButan(who, tLogsCap, tLogsTip,"logdir", cLOGDIR));
+        potato.add(makeButan(listenerManager, tLogsCap, tLogsTip,"logdir", ActionCommands.LOGDIR.toString(), true));
         potato.addSeparator();
-        potato.add(makeButan(who, tExitCap, tExitTip,"exit", cEXIT));
+        potato.add(makeButan(listenerManager, tExitCap, tExitTip,"exit", ActionCommands.EXIT.toString(), true));
         return potato;
     }
 
@@ -189,7 +188,7 @@ class UserInterfaceStuff
         return r;
     }
 
-    static JMenuBar standardMenuSetup(MainForm mainForm)
+    static JMenuBar standardMenuSetup(ListenerManager listenerManager)
     {
         JMenu menu;
         JMenuBar menuBar = new JMenuBar();
@@ -199,14 +198,14 @@ class UserInterfaceStuff
         menu.setMnemonic(KeyEvent.VK_F);
         menuBar.add(menu);
 
-        menu.add(fastMenuItem(mExit, KeyEvent.VK_E, KeyEvent.VK_X, ActionEvent.CTRL_MASK + ActionEvent.ALT_MASK, cEXIT, mainForm));
+        menu.add(fastMenuItem(mExit, KeyEvent.VK_E, KeyEvent.VK_X, ActionEvent.CTRL_MASK + ActionEvent.ALT_MASK, ActionCommands.EXIT.toString(), listenerManager));
 
         //Build second menu in the menu bar.
         menu = new JMenu(mHelp);
         menu.setMnemonic(KeyEvent.VK_H);
-        menu.add(fastMenuItem(mHelp, KeyEvent.VK_H, KeyEvent.VK_F1, 0, cHELP, mainForm));
+        menu.add(fastMenuItem(mHelp, KeyEvent.VK_H, KeyEvent.VK_F1, 0, ActionCommands.HELP.toString(), listenerManager));
         menu.addSeparator();
-        menu.add(fastMenuItem(mAbout, KeyEvent.VK_A, KeyEvent.VK_F12, 0, cABOUT, mainForm));
+        menu.add(fastMenuItem(mAbout, KeyEvent.VK_A, KeyEvent.VK_F12, 0, ActionCommands.ABOUT.toString(), listenerManager));
         menuBar.add(menu);
 
         return menuBar;
@@ -218,10 +217,10 @@ class UserInterfaceStuff
      *              @see ListenerManager#valueChanged(TreeSelectionEvent)
      *              because the switch/case use the creation order to execute the correct code.
      *
-     * @param who   listener of valueChanged event.
+     * @param listenerManager   listener of valueChanged event.
      * @return      the new tree
      */
-    static JTree leTreeSetup(MainForm who)
+    static JTree leTreeSetup(ListenerManager listenerManager)
     {
         // Creating root, branches 'n' leafs
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(sRoot);
@@ -247,7 +246,7 @@ class UserInterfaceStuff
 
         for (int i = 0; i < mrTree.getRowCount(); i++) { mrTree.expandRow(i); }
 
-        mrTree.addTreeSelectionListener(who);
+        mrTree.addTreeSelectionListener(listenerManager);
 
         return mrTree;
     }

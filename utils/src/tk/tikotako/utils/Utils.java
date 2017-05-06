@@ -13,7 +13,7 @@
 package tk.tikotako.utils;
 
 import javax.swing.*;
-import java.util.Arrays;
+import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,27 +25,53 @@ public class Utils
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    public final static Level L_ERR = Level.SEVERE;
-    public final static Level L_INF = Level.INFO;
-    public final static Level L_WAR = Level.WARNING;
+    private static final ImageIcon errorIco = new ImageIcon(Utils.class.getClass().getResource("/img/error.png"));
+    public static final String huegID = "uFYpRw_y[+tkr?@Wcq'KnOSX36k? X:CB_4yB-mtmQv~,Y07L1M;;/X!cxq`O!weBTa8SXaNy,|EiB#_26Dj)*9xrN%>[0*bC(Ar>$?qb,#4Z:- (U d2`9m)L^G%.&ft:ye7n{qi~`g9L}lCi19zvx?s8*~R^qD:'&fH|9c+s+mNa+/UG85#`;l70rrDQ}*~P' y%wilN!%M2LZOP*7fnjHz;;?R9VZl+vF{N'%.XM?";
 
-    public final static int CONSOLE = 9001;
-    public final static int FILE    = 9002;
-    public final static int CONFILE = 9003;
+    public static final Level L_ERR = Level.SEVERE;
+    public static final Level L_INF = Level.INFO;
+    public static final Level L_WAR = Level.WARNING;
 
-    public final static int nullint = -1;
+    public enum LogType { CONSOLE, FILE, CONFILE };
 
-    public final static String cEXIT = "acExit";
-    public final static String cSTART= "acStart";
-    public final static String cSTOP= "acStop";
-    public final static String cLOGDIR = "acLogDir";
-    public final static String cNULL = "-";
-    public final static String cHELP = "acHalpMiCarPliz";
-    public final static String cABOUT = "acAbbabbebebebbebbaechebabachubebbe";
+    public enum ActionCommands
+    {
+        FAIL ("acFAIL"),
+        EXIT("acExit"),
+        EXITX("acExit2lavendetta"),
+        START("acStart"),
+        STOP("acStop"),
+        LOGDIR("acLogDir"),
+        HELP("acHalpMiCarPliz"),
+        ABOUT("acAbbabbebebebbebbaechebabachubebbe");
+
+        private String value;
+
+        ActionCommands(String value)
+        {
+            this.value = value;
+        }
+
+        public static ActionCommands toCommand(String sCommand)
+        {
+            for (ActionCommands actionCommand : ActionCommands.values())
+            {
+                if (actionCommand.value.equalsIgnoreCase(sCommand))
+                {
+                    return actionCommand;
+                }
+            }
+            return FAIL;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+    }
 
     public static void errorMessage(Exception e)
     {
-        ImageIcon ico = new ImageIcon(Utils.class.getClass().getResource("/img/error.png"));
-        JOptionPane.showMessageDialog(null, e.getMessage(),"ERROR."+e.getMessage(), JOptionPane.ERROR_MESSAGE, ico);
+        JOptionPane.showMessageDialog(null, e.getMessage(),"ERROR.", JOptionPane.ERROR_MESSAGE, errorIco);
     }
 }

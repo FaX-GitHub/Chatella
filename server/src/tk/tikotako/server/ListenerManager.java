@@ -1,13 +1,13 @@
 package tk.tikotako.server;
 
 import java.awt.*;
+import java.net.URI;
 import java.io.File;
+import javax.swing.*;
+import java.util.Locale;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
-import javax.swing.*;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
@@ -18,10 +18,9 @@ import java.awt.event.WindowListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
-import tk.tikotako.utils.Utils;
-
 import static tk.tikotako.server.MainForm.*;
 import static tk.tikotako.utils.Utils.*;
+import tk.tikotako.utils.Utils;
 
 /**
  * Created by ^-_-^ on 30/04/2017 @ 21:40.
@@ -33,48 +32,53 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
 
     private static JPanel refCardContainer;
     private static JTree refLeTree;
-    private static boolean initialized = false;
-    private String qMessage, qTitle;
+    private String qMessage, qTitle, sMessage, sTitle;
+    private static MainForm mainForm;
 
-    void setupListener(JPanel cardContainer, JTree leTree)
+    ListenerManager()
     {
-        if (initialized)
-            return;
+    }
 
+    void setup(JPanel cardContainer, JTree leTree, MainForm leMainForm)
+    {
         ResourceBundle myResources = ResourceBundle.getBundle("localization", Locale.getDefault());
+        // Quit message
         qMessage = myResources.getString("qMessage");
         qTitle = myResources.getString("qTitle");
+        // Stop server message
+        sMessage = myResources.getString("sMessage");
+        sTitle = myResources.getString("sTitle");
 
         refCardContainer = cardContainer;
+        mainForm = leMainForm;
         refLeTree = leTree;
-
-        initialized = true;
     }
 
     private void saveOptions()
     {
         // saving data
         Properties p = new Properties();
-        MainForm.StuffToSave stuff = ((MainForm)this).getWindowData();
-        p.setProperty("windowX", Integer.toString(stuff.windowPosition[0]));
-        p.setProperty("windowY", Integer.toString(stuff.windowPosition[1]));
-        p.setProperty("ip", stuff.ip);
-        p.setProperty("port", stuff.port);
-        p.setProperty("mtod", stuff.mtod);
+        int [] wp = mainForm.getWinPos();
+        p.setProperty("windowX", Integer.toString(wp[0]));
+        p.setProperty("windowY", Integer.toString(wp[1]));
+        p.setProperty("ip", mainForm.getIp());
+        p.setProperty("port", mainForm.getPort());
+        p.setProperty("mtod", mainForm.getMotd());
+        p.setProperty("closeToTray",  Boolean.toString(mainForm.getCloseToTray()));
+        p.setProperty("logToFile",  Boolean.toString(mainForm.getLogToFile()));
         try
         {
             p.store(new FileWriter("Server.properties", false), "Chatella Server v " + chatellaVersion);
-        } catch (IOException e1)
+        } catch (Exception e)
         {
-            e1.printStackTrace();
+            LOG.log(Utils.L_ERR, ">> FileWriter <<", e);
         }
     }
 
-    private void loadOptions()
+    public void loadOptions()
     {
         // load data
         Properties p = new Properties();
-        StuffToSave stuff = new StuffToSave(((MainForm)this)); // derp
         try
         {
             p.load(new FileReader("Server.properties"));
@@ -82,34 +86,44 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
         {
             // FileNotFoundException lets ignore it
         }
-        stuff.windowPosition[0] = Integer.parseUnsignedInt(p.getProperty("windowX", "9001"));
-        stuff.windowPosition[1] = Integer.parseUnsignedInt(p.getProperty("windowY", "9001"));
-        stuff.ip = p.getProperty("ip", "0.0.0.0");
-        stuff.port = p.getProperty("port", "55561");
-        stuff.mtod = p.getProperty("mtod", "Chatella Server [v " + MainForm.chatellaVersion + "]\r\nWelcome to Chatella network.");
-        ((MainForm)this).setWindowData(stuff);
+        mainForm.setCloseToTray(Boolean.valueOf(p.getProperty("closeToTray", "true")));
+        mainForm.setLogToFile(Boolean.valueOf(p.getProperty("logToFile", "true")));
+        mainForm.setIp(p.getProperty("ip", "0.0.0.0"));
+        mainForm.setPort(p.getProperty("port", "55561"));
+        mainForm.setMotd(p.getProperty("mtod", "Chatella Server [v " + MainForm.chatellaVersion + "]\r\nWelcome to Chatella network."));
+        mainForm.setWinPos(Integer.parseUnsignedInt(p.getProperty("windowX", "9001")), Integer.parseUnsignedInt(p.getProperty("windowY", "9001")));
     }
 
     // ****************************  ActionListener ++
     @Override
     public void actionPerformed(ActionEvent actionEvent)
     {
-        System.out.println("actionPerformed > " + actionEvent.getActionCommand());
+        // System.out.println("actionPerformed > " + actionEvent.getActionCommand());
 
-        switch (actionEvent.getActionCommand())
+        ActionCommands command = ActionCommands.toCommand(actionEvent.getActionCommand());
+
+        switch (command)
         {
-            case cSTART:
+            case FAIL:
             {
-                // ((JButton) e.getSource()).setEnabled(false);
-                // TODO: start server
+                LOG.log(Utils.L_ERR, "ActionCommands.toCommand(String sCommand) >> Error Converting >> actionEvent.getActionCommand() = [" + actionEvent.getActionCommand() +"]");
                 break;
             }
-            case cSTOP:
+            case START:
             {
-                // TODO: ask question, if ok stop server
+                mainForm.startServer();
                 break;
             }
-            case cLOGDIR:
+            case STOP:
+            {
+                ImageIcon ico = new ImageIcon(UserInterfaceStuff.class.getClass().getResource("/img/stop.png"));
+                if (JOptionPane.showConfirmDialog(null, sMessage, sTitle, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, ico) == JOptionPane.YES_OPTION)
+                {
+                    mainForm.stopServer();
+                }
+                break;
+            }
+            case LOGDIR:
             {
                 try
                 {
@@ -120,26 +134,26 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
                 }
                 break;
             }
-            case cEXIT:
+            case EXIT: case EXITX:
             {
-                // TODO: ask qeustion then if ok stop server and exit
-                // if close to tray
-                // ((MainForm)this).mainWindow.setState(Frame.ICONIFIED);
-
-                // else
-                // ask if want to close
-                ImageIcon ico = new ImageIcon(UserInterfaceStuff.class.getClass().getResource("/img/door.png"));
-                if (JOptionPane.showConfirmDialog(null, qMessage, qTitle, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, ico) == JOptionPane.NO_OPTION)
+                if ((mainForm.getCloseToTray()) && (command == ActionCommands.EXITX)) // close to tray only if true and the click come from the [X] of the window
                 {
-                    return;
+                    mainForm.getWindow().setState(Frame.ICONIFIED);
+                }   else
+                {
+                    ImageIcon ico = new ImageIcon(UserInterfaceStuff.class.getClass().getResource("/img/door.png"));
+                    if (JOptionPane.showConfirmDialog(null, qMessage, qTitle, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, ico) == JOptionPane.NO_OPTION)
+                    {
+                        return;
+                    }
+                    // want to close
+                    mainForm.stopServer();
+                    saveOptions();
+                    System.exit(0);
                 }
-                // want to close
-                ((MainForm)this).stopServer();
-                saveOptions();
-                System.exit(0);
                 break;
             }
-            case cHELP:
+            case HELP:
             {
                 try
                 {
@@ -150,9 +164,9 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
                 }
                 break;
             }
-            case cABOUT:
+            case ABOUT:
             {
-                // TODO: Generate about
+                ((CardLayout) (refCardContainer.getLayout())).show(refCardContainer, "infoCard");
                 break;
             }
         }
@@ -168,8 +182,6 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
     @Override
     public void windowOpened(WindowEvent e)
     {
-        // TODO add load config
-        loadOptions();
     }
 
     /**
@@ -179,7 +191,7 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
     @Override
     public void windowClosing(WindowEvent e)
     {
-        this.actionPerformed(new ActionEvent(this, 0, cEXIT));
+        this.actionPerformed(new ActionEvent(this, 0, ActionCommands.EXITX.toString()));
     }
 
     /**
@@ -202,7 +214,6 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
     @Override
     public void windowIconified(WindowEvent e)
     {
-        //
     }
 
     /**
@@ -212,7 +223,6 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
     @Override
     public void windowDeiconified(WindowEvent e)
     {
-
     }
 
     /**
@@ -284,5 +294,5 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
             }
         }
     }
-    // ****************************  TreeSelectionListener ++
+    // ****************************  TreeSelectionListener --
 }

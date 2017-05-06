@@ -1,19 +1,26 @@
 package tk.tikotako.server;
 
-import java.awt.*;
-import java.net.URL;
+import tk.tikotako.utils.Utils;
+import tk.tikotako.utils.logger.TheLogger;
+
 import javax.swing.*;
-import java.text.Format;
-import java.util.Arrays;
-import java.util.logging.Logger;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import java.awt.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.URL;
+import java.util.logging.Logger;
 
 import static tk.tikotako.server.UserInterfaceStuff.changeLookAndFeel;
 import static tk.tikotako.server.UserInterfaceStuff.makeMainWindow;
 import static tk.tikotako.utils.Utils.errorMessage;
-import tk.tikotako.utils.logger.TheLogger;
-import tk.tikotako.utils.Utils;
+import static tk.tikotako.server.ServerLogStream.*;
 
 /**
  * Created by ^-_-^ on 27/04/2017 @ 20:37.
@@ -24,7 +31,6 @@ public class MainForm extends ListenerManager
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     final static String chatellaVersion = "1.0";
 
-    // private
     private JPanel manUsersPanel;
     private JPanel manChannelsPanel;
     private JPanel manLogsPanel;
@@ -43,70 +49,128 @@ public class MainForm extends ListenerManager
     private JSpinner portSpinner;
     private JTextField ipField;
     private JTextArea motdArea;
+    private JCheckBox closeToTrayCheckBox;
+    private JTextPane logOutput;
+    private JCheckBox logToFileCheckBox;
     private JFrame mainWindow;
 
-    static class StuffToSave
-    {
-        int [] windowPosition;
-        String ip, port, mtod;
+    // ****************************  Get & set ++
 
-        StuffToSave(MainForm who)
-        {
-            windowPosition =  new int [] { 9001, 9001 };
-            if (who.mainWindow.isShowing())
-            {
-                windowPosition =  new int [] { (int)who.mainWindow.getLocation().getX(), (int)who.mainWindow.getLocation().getY() };
-            }
-            port = who.portSpinner.getValue().toString();
-            ip = who.ipField.getText();
-            mtod = who.motdArea.getText();
-        }
+    boolean getCloseToTray()
+    {
+        return closeToTrayCheckBox.isSelected();
     }
 
-    StuffToSave getWindowData()
+    boolean getLogToFile()
     {
-        return new StuffToSave(this);
+        return logToFileCheckBox.isSelected();
     }
 
-    void setWindowData(StuffToSave loadedStuff)
+    JFrame getWindow()
     {
-        motdArea.setText(loadedStuff.mtod);
-        ipField.setText(loadedStuff.ip);
-        portSpinner.setValue(Integer.valueOf(loadedStuff.port));
+        return mainWindow;
+    }
 
-        if ((loadedStuff.windowPosition[0] != 9001) && (loadedStuff.windowPosition[1] != 9001))
+    int [] getWinPos()
+    {
+        return new int [] { (int)mainWindow.getLocation().getX(), (int)mainWindow.getLocation().getY() };
+    }
+
+    String getIp()
+    {
+        return ipField.getText();
+    }
+
+    String getPort()
+    {
+        return portSpinner.getValue().toString();
+    }
+
+    String getMotd()
+    {
+        return motdArea.getText();
+    }
+
+    /////// set
+
+    void setCloseToTray(boolean potato)
+    {
+        closeToTrayCheckBox.setSelected(potato);
+    }
+
+    void setLogToFile(boolean potato)
+    {
+        logToFileCheckBox.setSelected(potato);
+    }
+
+    void setWinPos(int X, int Y)
+    {
+        if ((X != 9001) && (Y != 9001))
         {
-            mainWindow.setLocation(loadedStuff.windowPosition[0], loadedStuff.windowPosition[1]);
+            mainWindow.setLocation(X, Y);
         } else
         {
             mainWindow.setLocationRelativeTo(null);
         }
     }
 
+    void setIp(String iP)
+    {
+        ipField.setText(iP);
+    }
+
+    void setPort(String pORT)
+    {
+        portSpinner.setValue(Integer.valueOf(pORT));
+    }
+
+    void setMotd(String mOTD)
+    {
+        motdArea.setText(mOTD);
+    }
+
+    // ****************************  Get & Set --
+
     private MainForm()
     {
-        TheLogger.start(Utils.CONFILE);
+        TheLogger.start(Utils.LogType.FILE);
         LOG.log(Utils.L_INF, "Initiating startup sequence.");
 
         // Show loading image, is set in the build jar option page and the manifest file
         SplashScreen.getSplashScreen();
 
         mainWindow = makeMainWindow(this, mainPanel, menuBar);
+        this.setup(cardContainer, leTree, this);
         changeLookAndFeel(mainWindow);
-        setupListener(cardContainer, leTree); // ListenerManager
+        mainWindow.setVisible(true);
+        this.loadOptions();
+
+        // TODO remove
+        ((CardLayout) (cardContainer.getLayout())).show(cardContainer, "logServerCard");
     }
 
     public static void main(String[] args)
     {
+        javax.swing.SwingUtilities.invokeLater(() ->
+        {
+            MainForm mf = new MainForm();
+        });
+    }
 
-        // javax.swing.SwingUtilities.invokeLater(new Runnable() { @Override public void run() { new MainForm(); } });
-        javax.swing.SwingUtilities.invokeLater(MainForm::new);
+    void startServer()
+    {
+        // TODO check server running (Y)check client connected (Y) sendmessagetoclients - close
+        System.out.printf("%s\r\n", "startin");
+        leToolBar.getComponent(0).setEnabled(false); // 0 btn start
+        leToolBar.getComponent(1).setEnabled(true); // 1 btn stop
     }
 
     void stopServer()
     {
         // TODO check server running (Y)check client connected (Y) sendmessagetoclients - close
-        System.out.printf("%s", "stoppin");
+        System.out.printf("%s\r\n", "stoppin");
+        leToolBar.getComponent(0).setEnabled(true);
+        leToolBar.getComponent(1).setEnabled(false);
     }
 
     private void createUIComponents()
@@ -121,10 +185,30 @@ public class MainForm extends ListenerManager
         ipField = new JTextField();
         motdArea = new JTextArea();
 
+        System.out.printf("%s", "HURRRRRRRRRRRRR");
+        logOutput = new JTextPane();
+        logOutput.setEditable(false);
+
+        System.setOut(new PrintStream(new ServerLogStream(logOutput, true)));
+        System.setErr(new PrintStream(new ServerLogStream(logOutput, false)));
+
+        doLogToFile(true);
+        log("%s %d %s", "PIZZA", 1234, "\r\n");
+        err("MANDOLINO\r\n");
+
+        doLogToFile(false);
+        err("PIZZA 2\r\n");
+        err("MANDOLINO 2\r\n");
+
+        doLogToFile(true);
+        log( "PIZZA 3\r\n");
+        err("MANDOLINO 3\r\n");
+
         // setup the Info panel with an HTML and hyperlink event listener
         InfoEditorPanel = new JEditorPane();
         InfoEditorPanel.setEditable(false);
         InfoEditorPanel.setOpaque(false);
+        //noinspection Convert2Lambda
         InfoEditorPanel.addHyperlinkListener(new HyperlinkListener()
         {
             @Override
