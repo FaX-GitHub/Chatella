@@ -31,6 +31,8 @@ class UserInterfaceStuff
     private static String mFile, mExit, mHelp, mAbout;
     // leToolBar strings
     private static String tStartCap, tStopCap, tLogsCap, tExitCap, tStartTip, tStopTip, tLogsTip, tExitTip;
+    // Other strings
+    public static String eStart, eRunning;
 
     static void loadLocalized()
     {
@@ -65,6 +67,9 @@ class UserInterfaceStuff
         tStopTip = myResources.getString("B_StopToolTip");
         tLogsTip = myResources.getString("B_LogDirToolTip");
         tExitTip = myResources.getString("B_ExitToolTip");
+        // Others
+        eStart = myResources.getString("O_eStart");
+        eRunning = myResources.getString("O_eRunning");
     }
 
     static void changeLookAndFeel(JFrame mainWindow)

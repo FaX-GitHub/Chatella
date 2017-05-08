@@ -12,26 +12,23 @@
 
 package tk.tikotako.utils.logger;
 
-import tk.tikotako.utils.logger.TheFormatter;
-
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.*;
+import java.text.SimpleDateFormat;
 
 import static tk.tikotako.utils.Utils.*;
-import static tk.tikotako.utils.Utils.LogType.*;
 
 /**
  * Created by ^-_-^ on 25/04/2017 @ 16:27.
- * <p>
- * <p>
+ * <br>
+ * <br>
  * Modified copypasta from http://www.vogella.com/tutorials/Logging/article.html
  */
 
 public class TheLogger
 {
-    static private void disableLog(Class _wich)
+    static private void disableLog(Class someClass)
     {
         Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
         if (logger.getHandlers().length > 0)
@@ -40,7 +37,7 @@ public class TheLogger
             {
                 try
                 {
-                    if (_wich.isInstance(_handler))
+                    if (someClass.isInstance(_handler))
                     {
                         logger.removeHandler(_handler);
                         return;
@@ -55,7 +52,6 @@ public class TheLogger
 
     private static void enableLogConsole()
     {
-        // get the global logger to configure it
         Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
         logger.setLevel(Level.ALL);
         logger.addHandler(new ConsoleHandler());
@@ -63,7 +59,6 @@ public class TheLogger
 
     static private void enableLogToFile()
     {
-        // get the global logger to configure it
         Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
         try
         {

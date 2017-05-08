@@ -13,20 +13,23 @@
 package tk.tikotako.utils;
 
 import javax.swing.*;
-import java.io.PrintStream;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Created by ^-_-^ on 25/04/2017 @ 19:42.
+ *  <br>
+ *  <br>
+ *  Utility class.
  **/
 
 public class Utils
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private static final ImageIcon errorIco = new ImageIcon(Utils.class.getClass().getResource("/img/error.png"));
-    public static final String huegID = "uFYpRw_y[+tkr?@Wcq'KnOSX36k? X:CB_4yB-mtmQv~,Y07L1M;;/X!cxq`O!weBTa8SXaNy,|EiB#_26Dj)*9xrN%>[0*bC(Ar>$?qb,#4Z:- (U d2`9m)L^G%.&ft:ye7n{qi~`g9L}lCi19zvx?s8*~R^qD:'&fH|9c+s+mNa+/UG85#`;l70rrDQ}*~P' y%wilN!%M2LZOP*7fnjHz;;?R9VZl+vF{N'%.XM?";
+    public static final ImageIcon errorIco = new ImageIcon(Utils.class.getClass().getResource("/img/error.png"));
 
     public static final Level L_ERR = Level.SEVERE;
     public static final Level L_INF = Level.INFO;
@@ -34,7 +37,9 @@ public class Utils
 
     public enum LogType { CONSOLE, FILE, CONFILE };
 
-    public enum ServerLogType { NORMAL, ERROR };
+    public enum ServerLogType { NORMAL, ERROR, INFO};
+
+    public enum ServerSatus { RUNNING, STOPPED };
 
     public enum ActionCommands
     {
@@ -72,8 +77,34 @@ public class Utils
         }
     }
 
+    /**
+     *  Simple way to generate an error window
+     * @param title
+     * @param msg
+     */
+    public static void errorMessage(String title, String msg)
+    {
+        JOptionPane.showMessageDialog(null, msg, title, JOptionPane.ERROR_MESSAGE, errorIco);
+    }
+
+    public static void errorMessage(String title, Exception e)
+    {
+        JOptionPane.showMessageDialog(null, e.getMessage(), title, JOptionPane.ERROR_MESSAGE, errorIco);
+    }
+
     public static void errorMessage(Exception e)
     {
-        JOptionPane.showMessageDialog(null, e.getMessage(),"ERROR.", JOptionPane.ERROR_MESSAGE, errorIco);
+        errorMessage("ERROR.", e.getMessage());
     }
+
+    public static void errorMessage(String err)
+    {
+        errorMessage("ERROR.", err);
+    }
+
+    public static String formatSockAddr(SocketAddress socketAddress)
+    {
+        return ((InetSocketAddress)socketAddress).getHostString() + " : " + Integer.toUnsignedString(((InetSocketAddress)socketAddress).getPort());
+    }
+
 }

@@ -30,15 +30,18 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private static JPanel refCardContainer;
     private static JTree refLeTree;
-    private String qMessage, qTitle, sMessage, sTitle;
     private static MainForm mainForm;
+    private static JPanel refCardContainer;
+    private String qMessage, qTitle, sMessage, sTitle;
 
-    ListenerManager()
-    {
-    }
-
+    /**
+     *  Setup the Listener class.
+     *
+     * @param cardContainer reference to MainForm.cardContainer
+     * @param leTree        reference to MainForm.leTree
+     * @param leMainForm    reference to MainForm
+     */
     void setup(JPanel cardContainer, JTree leTree, MainForm leMainForm)
     {
         ResourceBundle myResources = ResourceBundle.getBundle("localization", Locale.getDefault());
@@ -54,6 +57,11 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
         refLeTree = leTree;
     }
 
+    /**
+     * Save options to file.
+     * <br>
+     * Is private because is used only here.
+     */
     private void saveOptions()
     {
         // saving data
@@ -75,7 +83,12 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
         }
     }
 
-    public void loadOptions()
+    /**
+     * Load options from file.
+     * <br>
+     * Is not private because is used in the MainForm class
+     */
+    void loadOptions()
     {
         // load data
         Properties p = new Properties();
@@ -98,10 +111,7 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
     @Override
     public void actionPerformed(ActionEvent actionEvent)
     {
-        // System.out.println("actionPerformed > " + actionEvent.getActionCommand());
-
         ActionCommands command = ActionCommands.toCommand(actionEvent.getActionCommand());
-
         switch (command)
         {
             case FAIL:
@@ -127,7 +137,9 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
             {
                 try
                 {
-                    Desktop.getDesktop().open(new File("Logs/"));
+                    mainForm.sendMessageToAll("POTATO");
+                    //TODO rimettere normale
+                    //Desktop.getDesktop().open(new File("Logs/"));
                 } catch (Exception eX)
                 {
                     LOG.log(Utils.L_ERR, "Opening Logs direcory", eX);
@@ -142,14 +154,12 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
                 }   else
                 {
                     ImageIcon ico = new ImageIcon(UserInterfaceStuff.class.getClass().getResource("/img/door.png"));
-                    if (JOptionPane.showConfirmDialog(null, qMessage, qTitle, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, ico) == JOptionPane.NO_OPTION)
+                    if (JOptionPane.showConfirmDialog(null, qMessage, qTitle, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, ico) == JOptionPane.YES_OPTION)
                     {
-                        return;
+                        mainForm.stopServer();
+                        saveOptions();
+                        System.exit(0);
                     }
-                    // want to close
-                    mainForm.stopServer();
-                    saveOptions();
-                    System.exit(0);
                 }
                 break;
             }
@@ -172,7 +182,6 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
         }
     }
     // ****************************  ActionListener --
-
 
     // ****************************  WindowListener ++
 

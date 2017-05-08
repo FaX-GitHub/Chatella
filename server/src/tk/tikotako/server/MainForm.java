@@ -7,10 +7,9 @@ import java.util.logging.Logger;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-import static tk.tikotako.server.UserInterfaceStuff.changeLookAndFeel;
-import static tk.tikotako.server.UserInterfaceStuff.makeMainWindow;
-import static tk.tikotako.utils.Utils.errorMessage;
+import static tk.tikotako.server.UserInterfaceStuff.*;
 import tk.tikotako.utils.logger.TheLogger;
+import static tk.tikotako.utils.Utils.*;
 import tk.tikotako.utils.Utils;
 
 /**
@@ -51,13 +50,19 @@ public class MainForm extends ListenerManager
     private JPanel logServerPanel;
     private JTextPane logOutput;
 
-    private JPanel infoPanel;
+    private JPanel statsPanel;
     private JEditorPane InfoEditorPanel;
 
     // Others
-    ServerLog serverLog;
+    private ChtlServSock servSock;
+    private ServerLog serverLog;
 
     // ****************************  Get & set ++
+
+    ServerLog getServerLog()
+    {
+        return serverLog;
+    }
 
     boolean getCloseToTray()
     {
@@ -148,6 +153,11 @@ public class MainForm extends ListenerManager
         mainWindow.setVisible(true);
         this.loadOptions();
 
+        serverLog = new ServerLog(logOutput);
+        serverLog.logToFile(getLogToFile());
+
+        servSock = new ChtlServSock(this);
+
         // TODO remove
         ((CardLayout) (cardContainer.getLayout())).show(cardContainer, "logServerCard");
     }
@@ -159,18 +169,30 @@ public class MainForm extends ListenerManager
 
     void startServer()
     {
-        // TODO check server running (Y)check client connected (Y) sendmessagetoclients - close
-        System.out.printf("%s\r\n", "startin");
-        leToolBar.getComponent(0).setEnabled(false); // 0 btn start
-        leToolBar.getComponent(1).setEnabled(true); // 1 btn stop
+        servSock.start();
+        if(servSock.isRunning())
+        {
+            leToolBar.getComponent(0).setEnabled(false); // 0 btn start
+            leToolBar.getComponent(1).setEnabled(true); // 1 btn stop
+        }
     }
 
     void stopServer()
     {
-        // TODO check server running (Y)check client connected (Y) sendmessagetoclients - close
-        System.out.printf("%s\r\n", "stoppin");
-        leToolBar.getComponent(0).setEnabled(true);
-        leToolBar.getComponent(1).setEnabled(false);
+        if(servSock.isRunning())
+        {
+            servSock.stop();
+            leToolBar.getComponent(0).setEnabled(true);
+            leToolBar.getComponent(1).setEnabled(false);
+        }
+    }
+
+    void sendMessageToAll(String msg)
+    {
+        if(servSock.isRunning())
+        {
+            servSock.msgToAll(msg);
+        }
     }
 
     private void createUIComponents()
@@ -187,7 +209,6 @@ public class MainForm extends ListenerManager
 
         logOutput = new JTextPane();
         logOutput.setEditable(false);
-        serverLog = new ServerLog(logOutput);
 
         // setup the Info panel with an HTML and hyperlink event listener
         InfoEditorPanel = new JEditorPane();

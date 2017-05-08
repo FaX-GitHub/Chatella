@@ -40,7 +40,7 @@ class ServerLog
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private Style nStyle, tStyle, eStyle;
+    private Style nStyle, tStyle, iStyle, eStyle;
     private JTextPane textPane;
     private StyledDocument doc;
     private FileWriter log_sama;
@@ -62,6 +62,10 @@ class ServerLog
         eStyle= textPane.addStyle("error", null);
         StyleConstants.setForeground(eStyle, Color.red);
         StyleConstants.setBold(eStyle, true);
+
+        iStyle = textPane.addStyle("info", null);
+        StyleConstants.setForeground(iStyle, Color.pink);
+        StyleConstants.setBold(iStyle, true);
 
         tStyle = textPane.addStyle("time", null);
         StyleConstants.setForeground(tStyle, Color.black);
@@ -103,36 +107,62 @@ class ServerLog
 
     /**
      *  Output the given text with normal style.
-     * @param text
+     * @param text text to log
      */
     void log(String text)
     {
-        String naw = (new SimpleDateFormat("[HH:MM:ss]")).format(new Time(System.currentTimeMillis()));
-        write(naw, ServerLogType.NORMAL,  text + "\r\n");
+        javax.swing.SwingUtilities.invokeLater(()->write(getNaw(), ServerLogType.NORMAL,  text + "\r\n"));
     }
 
     /**
      *  Output the given text with error style.
-     * @param text
+     * @param text text to log
      */
     void err(String text)
     {
-        String naw = (new SimpleDateFormat("[HH:MM:ss]")).format(new Time(System.currentTimeMillis()));
-        write(naw, ServerLogType.ERROR,  text + "\r\n");
+        javax.swing.SwingUtilities.invokeLater(()->write(getNaw(), ServerLogType.ERROR,  text + "\r\n"));
+    }
+
+    /**
+     *  Output the given text with info style.
+     * @param text text to log
+     */
+    void inf(String text)
+    {
+        javax.swing.SwingUtilities.invokeLater(()->write(getNaw(), ServerLogType.INFO,  text + "\r\n"));
+    }
+
+    /**
+     *  Get current time.
+     * @return  Time formatted output as string.
+     */
+    private String getNaw()
+    {
+        return  (new SimpleDateFormat("[HH:MM:ss]")).format(new Time(System.currentTimeMillis()));
     }
 
     /**
      *  The real method that output the given text.
      * @param naw       time string in this format: [HH:MM:ss]
-     * @param type      the output style type (normal or error)
+     * @param type      the output style type (normal, info or error)
      * @param tmpSTR    the text to output.
      */
     private void write(String naw, ServerLogType type, String tmpSTR)
     {
+        Style style = nStyle;
+
+        if (type.equals(ServerLogType.ERROR))
+        {
+            style = eStyle;
+        } else if (type.equals(ServerLogType.INFO))
+        {
+            style = iStyle;
+        }
+
         try
         {
             doc.insertString(doc.getLength(), naw + " > ", tStyle);
-            doc.insertString(doc.getLength(), tmpSTR, type.equals(ServerLogType.NORMAL)?nStyle:eStyle);
+            doc.insertString(doc.getLength(), tmpSTR, style);
             textPane.setCaretPosition(textPane.getDocument().getLength());
         } catch (Exception e)
         {
@@ -154,5 +184,11 @@ class ServerLog
                 errorMessage(e);
             }
         }
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ServerLog {" + this.hashCode() + '}';
     }
 }
