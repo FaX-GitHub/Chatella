@@ -2,7 +2,6 @@ package tk.tikotako.server;
 
 import java.awt.*;
 import java.net.URI;
-import java.io.File;
 import javax.swing.*;
 import java.util.Locale;
 import java.io.FileReader;
@@ -26,7 +25,7 @@ import tk.tikotako.utils.Utils;
  * Created by ^-_-^ on 30/04/2017 @ 21:40.
  **/
 
-public class ListenerManager implements ActionListener, WindowListener, TreeSelectionListener
+class ListenerManager implements ActionListener, WindowListener, TreeSelectionListener
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -191,6 +190,9 @@ public class ListenerManager implements ActionListener, WindowListener, TreeSele
     @Override
     public void windowOpened(WindowEvent e)
     {
+        // INFO fast debug
+        mainForm.startServer();
+        ((CardLayout) (mainForm.getCardContainer().getLayout())).show(mainForm.getCardContainer(), "logServerCard");
     }
 
     /**

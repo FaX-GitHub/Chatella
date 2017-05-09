@@ -14,7 +14,6 @@ package tk.tikotako.server;
 
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.logging.Logger;
 import static tk.tikotako.server.UserInterfaceStuff.eStart;
 import static tk.tikotako.utils.Utils.L_ERR;
 import static tk.tikotako.utils.Utils.errorMessage;
-import static tk.tikotako.utils.Utils.formatSockAddr;
 
 /**
  * Created by ^-_-^ on 25/04/2017 @ 15:26.
@@ -33,11 +31,11 @@ class ChtlServSock
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private MainForm mainForm;
-    private ServerLog serverLog;
+    private final MainForm mainForm;
+    private final ServerLog serverLog;
     private boolean isKill;
     private ServerSocket serverSocket;
-    private final List<cSock> clientSocketList = new ArrayList<cSock>();
+    private final List<cSock> clientSocketList = new ArrayList<>();
 
     ChtlServSock(MainForm mainForm)
     {
@@ -51,9 +49,6 @@ class ChtlServSock
     {
         String msg = "Starting server on (IP - PORT): [" + mainForm.getIp() + " - " + mainForm.getPort() + "]";
         serverLog.log(msg);
-        System.out.println("clientSocketList.isEmpty -> " + clientSocketList.isEmpty());
-        System.out.println("clientSocketList.size -> " + clientSocketList.size());
-
         try
         {
             serverSocket = new ServerSocket();

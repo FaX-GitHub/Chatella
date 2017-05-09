@@ -16,14 +16,14 @@ import tk.tikotako.utils.Utils;
  * Created by ^-_-^ on 27/04/2017 @ 20:37.
  **/
 
-public class MainForm extends ListenerManager
+class MainForm extends ListenerManager
 {
     // Const
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     final static String chatellaVersion = "1.0";
 
     // UI
-    private JFrame mainWindow;
+    private final JFrame mainWindow;
     private JTree leTree;
     private JMenuBar menuBar;
     private JToolBar leToolBar;
@@ -54,10 +54,16 @@ public class MainForm extends ListenerManager
     private JEditorPane InfoEditorPanel;
 
     // Others
-    private ChtlServSock servSock;
-    private ServerLog serverLog;
+    private final ChtlServSock servSock;
+    private final ServerLog serverLog;
 
     // ****************************  Get & set ++
+
+
+    JPanel getCardContainer()
+    {
+        return cardContainer;
+    }
 
     ServerLog getServerLog()
     {
@@ -157,9 +163,6 @@ public class MainForm extends ListenerManager
         serverLog.logToFile(getLogToFile());
 
         servSock = new ChtlServSock(this);
-
-        // TODO remove
-        ((CardLayout) (cardContainer.getLayout())).show(cardContainer, "logServerCard");
     }
 
     public static void main(String[] args)

@@ -12,6 +12,7 @@ import static tk.tikotako.utils.Utils.L_ERR;
 import static tk.tikotako.utils.Utils.formatSockAddr;
 import tk.tikotako.utils.PacketsManager.DecodedDataFromClient;
 import tk.tikotako.utils.PacketsManager.PacketType;
+import tk.tikotako.utils.PacketsManager.DataType;
 import tk.tikotako.utils.PacketsManager;
 
 /**
@@ -21,24 +22,30 @@ import tk.tikotako.utils.PacketsManager;
 public class cSock extends Thread
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    private final List<cSock> clientSocketList;
 
-    private Socket client;
-    private ServerLog serverLog;
-    private String remoteClientString;
+    enum BuffType { BREADER, BRITER }
+
+    private final List<cSock> clientsList;
+
+    private final Socket client;
+    private final ServerLog serverLog;
+    private final String remoteClientString;
     private DataOutputStream serverToClient;
     private DataInputStream clientToServer;
-    private PacketsManager packetsManager;
 
+    private final PacketsManager packetsManager;
 
-    cSock(ServerLog serverLog, List<cSock> clientSocketList, Socket client)
+    private boolean isFirstPacket = true;
+    private boolean isLoggedIn = false;
+
+    cSock(ServerLog serverLog, List<cSock> clientsList, Socket client)
     {
         this.client = client;
         this.serverLog = serverLog;
         setupStream(BuffType.BRITER);
         setupStream(BuffType.BREADER);
         packetsManager = new PacketsManager();
-        this.clientSocketList = clientSocketList;
+        this.clientsList = clientsList;
         this.remoteClientString = formatSockAddr(client.getRemoteSocketAddress());
     }
 
@@ -102,7 +109,7 @@ public class cSock extends Thread
             The packet start with an int then there is the data (so here we have data only, the int is read in the reading loop)
 
             1)server parte
-            2) client si connette e manda nick + pwd
+            2) tester si connette e manda nick + pwd
             3) server controlla se:
                 nick è connesso
                     se è connesso risponde di cambiare nick
@@ -126,23 +133,41 @@ public class cSock extends Thread
                      se lo è e user accetta risponde 0x02 0x03
 
             register nick <- sta sul server in un db
-            request infoForm <- sta sul client
+            request infoForm <- sta sul tester
             emoji bho farei supporto limitato al posto che tutti almeno uso i byte non usati dai char nelle string oppure è meglio usare stringhe unicode bho
         */
 
         serverLog.data(new String(data));
-        DecodedDataFromClient decodedData = packetsManager.decode(PacketType.FROMCLIENT, data);
+        DecodedDataFromClient decodedData = packetsManager.decode(PacketType.FROM_CLIENT, data);
+
         serverLog.data(decodedData.toString());
+
+        if (isFirstPacket && (decodedData.command != DataType.INIT))
+        {
+            serverLog.err("Wrong INIT, closing [" + remoteClientString + "]");
+            this.close(true);
+            return;
+        }
 
         switch (decodedData.command)
         {
             case INIT:
             {
-                serverLog.data("INIT [version] " + decodedData.version);
+                if(isFirstPacket)
+                {
+                    serverLog.data("INIT [version] " + decodedData.version);
+                    isFirstPacket = false;
+                } else
+                {
+                    serverLog.data("NOT FIRST PACKET, DEBUG ONLY - INIT [version] " + decodedData.version);
+                }
                 break;
             }
             case REGISTER:
                 serverLog.data("REGISTER [email] " + decodedData.mail + " [password] " + decodedData.pwd);
+                break;
+            case LOGIN:
+                serverLog.data("LOGIN [password] " + decodedData.pwd);
                 break;
             case MESSAGE:
                 serverLog.data("MESSAGE [to] " + decodedData.receiver + " [msg] " + decodedData.message);
@@ -162,10 +187,10 @@ public class cSock extends Thread
     @Override
     public void run()
     {
-        synchronized (clientSocketList)
+        synchronized (clientsList)
         {
-            clientSocketList.add(this);
-            serverLog.log("New client connected: [" + remoteClientString + "] Total: (" + clientSocketList.size() + ")");
+            clientsList.add(this);
+            serverLog.log("New tester connected: [" + remoteClientString + "] Total: (" + clientsList.size() + ")");
         }
 
         byte[] data = null;
@@ -194,10 +219,9 @@ public class cSock extends Thread
                 }
             } else
             {
-                int bytesRead = 0;
                 try
                 {
-                    bytesRead = clientToServer.read(data, currentDataSize, totalDataSize - currentDataSize);
+                    int bytesRead = clientToServer.read(data, currentDataSize, totalDataSize - currentDataSize);
                     serverLog.data("currentDataSize = " + currentDataSize + "\tbytesRead = " + bytesRead);
                     if ((bytesRead > 0) && ((currentDataSize += bytesRead) == totalDataSize))
                         {
@@ -251,18 +275,13 @@ public class cSock extends Thread
                         {
                             serverLog.inf("Connection closed [" + remoteClientString + "]");
                         }
-                        synchronized (clientSocketList)
+                        synchronized (clientsList)
                         {
-                            clientSocketList.remove(this);
+                            clientsList.remove(this);
                         }
                     }
                 }
             }
         }
-    }
-
-    enum BuffType
-    {
-        BREADER, BRITER
     }
 }

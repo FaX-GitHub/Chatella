@@ -17,6 +17,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * Created by ^-_-^ on 25/04/2017 @ 19:42.
@@ -31,13 +32,15 @@ public class Utils
 
     public static final ImageIcon errorIco = new ImageIcon(Utils.class.getClass().getResource("/img/error.png"));
 
+    private static final String regex = "\\b((25[0–5]|2[0–4]\\d|[01]?\\d\\d?)(\\.)){3}(25[0–5]|2[0–4]\\d|[01]?\\d\\d?)\\b";
+
     public static final Level L_ERR = Level.SEVERE;
     public static final Level L_INF = Level.INFO;
     public static final Level L_WAR = Level.WARNING;
 
-    public enum LogType { CONSOLE, FILE, CONFILE };
+    public enum LogType { CONSOLE, FILE, CONFILE }
 
-    public enum ServerSatus { RUNNING, STOPPED };
+    public enum ServerSatus { RUNNING, STOPPED }
 
     public enum ActionCommands
     {
@@ -50,7 +53,7 @@ public class Utils
         HELP("acHalpMiCarPliz"),
         ABOUT("acAbbabbebebebbebbaechebabachubebbe");
 
-        private String value;
+        private final String value;
 
         ActionCommands(String value)
         {
@@ -70,39 +73,70 @@ public class Utils
         }
 
         @Override
-        public String toString() {
+        public String toString()
+        {
             return value;
         }
     }
 
     /**
      *  Simple way to generate an error window
-     * @param title
-     * @param msg
+     * @param title Dialog title
+     * @param msg   Dialog message
      */
     public static void errorMessage(String title, String msg)
     {
         JOptionPane.showMessageDialog(null, msg, title, JOptionPane.ERROR_MESSAGE, errorIco);
     }
 
+    /**
+     *  Simple way to generate an error window
+     * @param title Dialog title
+     * @param e     Exception
+     */
     public static void errorMessage(String title, Exception e)
     {
         JOptionPane.showMessageDialog(null, e.getMessage(), title, JOptionPane.ERROR_MESSAGE, errorIco);
     }
 
+    /**
+     *  Simple way to generate an error window with "ERROR." title
+     * @param e     Exception
+     */
     public static void errorMessage(Exception e)
     {
         errorMessage("ERROR.", e.getMessage());
     }
 
-    public static void errorMessage(String err)
+    /**
+     *  Simple way to generate an error window with "ERROR." title
+     * @param msg   Dialog message
+     */
+    public static void errorMessage(String msg)
     {
-        errorMessage("ERROR.", err);
+        errorMessage("ERROR.", msg);
     }
 
+    /**
+     *  Output a socketAddress in IP : PORT format
+     *
+     * @param socketAddress socketAddress
+     * @return              String
+     */
     public static String formatSockAddr(SocketAddress socketAddress)
     {
         return ((InetSocketAddress)socketAddress).getHostString() + " : " + Integer.toUnsignedString(((InetSocketAddress)socketAddress).getPort());
+    }
+
+    /**
+     *  Validate an ipv4 address
+     *
+     * @param ipAddress The IP 0.0.0.0 to 255.255.255.255
+     * @return          true if is valid false if not
+     */
+    public static boolean validateIP(String ipAddress)
+    {
+        return Pattern.matches(regex, ipAddress);
     }
 
 }

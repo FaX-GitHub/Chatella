@@ -23,7 +23,6 @@ import java.text.SimpleDateFormat;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import static tk.tikotako.utils.Utils.errorMessage;
 import static tk.tikotako.utils.Utils.*;
 import tk.tikotako.utils.Utils;
 
@@ -39,11 +38,15 @@ import tk.tikotako.utils.Utils;
 class ServerLog
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    public enum ServerLogType { NORMAL, ERROR, INFO, DATA};
+    public enum ServerLogType { NORMAL, ERROR, INFO, DATA}
 
-    private Style nStyle, tStyle, iStyle, eStyle, dStyle;
-    private JTextPane textPane;
-    private StyledDocument doc;
+    private final Style nStyle;
+    private final Style tStyle;
+    private final Style iStyle;
+    private final Style eStyle;
+    private final Style dStyle;
+    private final JTextPane textPane;
+    private final StyledDocument doc;
     private FileWriter log_sama;
     private boolean logToFile = false;
 
