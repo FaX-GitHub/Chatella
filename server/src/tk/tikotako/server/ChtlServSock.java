@@ -47,13 +47,6 @@ class ChtlServSock
         serverLog.log("ChtlServSock(MainForm mainForm)");
     }
 
-
-    // creare classe cSocket
-    // implementare ping che autoclosa se non ponga o ce nerrore
-    // overridare close in modo che si autodeleti dal list
-    // socket devono essere ssl
-    // volantino coop
-
     void start()
     {
         String msg = "Starting server on (IP - PORT): [" + mainForm.getIp() + " - " + mainForm.getPort() + "]";

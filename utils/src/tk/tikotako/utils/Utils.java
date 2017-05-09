@@ -37,8 +37,6 @@ public class Utils
 
     public enum LogType { CONSOLE, FILE, CONFILE };
 
-    public enum ServerLogType { NORMAL, ERROR, INFO};
-
     public enum ServerSatus { RUNNING, STOPPED };
 
     public enum ActionCommands

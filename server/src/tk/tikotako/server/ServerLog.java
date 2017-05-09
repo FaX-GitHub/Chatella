@@ -39,8 +39,9 @@ import tk.tikotako.utils.Utils;
 class ServerLog
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    public enum ServerLogType { NORMAL, ERROR, INFO, DATA};
 
-    private Style nStyle, tStyle, iStyle, eStyle;
+    private Style nStyle, tStyle, iStyle, eStyle, dStyle;
     private JTextPane textPane;
     private StyledDocument doc;
     private FileWriter log_sama;
@@ -58,18 +59,24 @@ class ServerLog
 
         nStyle = textPane.addStyle("normal", null);
         StyleConstants.setForeground(nStyle, Color.blue);
+        StyleConstants.setBold(nStyle, false);
 
-        eStyle= textPane.addStyle("error", null);
-        StyleConstants.setForeground(eStyle, Color.red);
-        StyleConstants.setBold(eStyle, true);
+        tStyle = textPane.addStyle("time", null);
+        StyleConstants.setForeground(tStyle, Color.black);
+        StyleConstants.setBold(tStyle, true);
 
         iStyle = textPane.addStyle("info", null);
         StyleConstants.setForeground(iStyle, Color.pink);
         StyleConstants.setBold(iStyle, true);
 
-        tStyle = textPane.addStyle("time", null);
-        StyleConstants.setForeground(tStyle, Color.black);
-        StyleConstants.setBold(tStyle, true);
+        eStyle = textPane.addStyle("error", null);
+        StyleConstants.setForeground(eStyle, Color.red);
+        StyleConstants.setBold(eStyle, true);
+
+        dStyle = textPane.addStyle("data", null);
+        StyleConstants.setForeground(dStyle, Color.blue);
+        StyleConstants.setBackground(dStyle, Color.orange);
+        StyleConstants.setBold(dStyle, false);
     }
 
     /**
@@ -133,6 +140,15 @@ class ServerLog
     }
 
     /**
+     *  Output the given text with data style.
+     * @param text text to log
+     */
+    void data(String text)
+    {
+        javax.swing.SwingUtilities.invokeLater(()->write(getNaw(), ServerLogType.DATA,  text + "\r\n"));
+    }
+
+    /**
      *  Get current time.
      * @return  Time formatted output as string.
      */
@@ -157,6 +173,9 @@ class ServerLog
         } else if (type.equals(ServerLogType.INFO))
         {
             style = iStyle;
+        } else if (type.equals(ServerLogType.DATA))
+        {
+            style = dStyle;
         }
 
         try
@@ -170,7 +189,7 @@ class ServerLog
             errorMessage(e);
         }
 
-        if (logToFile)
+        if (logToFile && (type != ServerLogType.DATA))
         {
             try
             {

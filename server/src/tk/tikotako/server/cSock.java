@@ -1,5 +1,6 @@
 package tk.tikotako.server;
 
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,6 +10,9 @@ import java.util.logging.Logger;
 
 import static tk.tikotako.utils.Utils.L_ERR;
 import static tk.tikotako.utils.Utils.formatSockAddr;
+import tk.tikotako.utils.PacketsManager.DecodedDataFromClient;
+import tk.tikotako.utils.PacketsManager.PacketType;
+import tk.tikotako.utils.PacketsManager;
 
 /**
  * Created by ^-_-^ on 08/05/2017 @ 16:06.
@@ -17,23 +21,25 @@ import static tk.tikotako.utils.Utils.formatSockAddr;
 public class cSock extends Thread
 {
     private final static Logger LOG = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    enum BuffType { BREADER, BRITER };
-
     private final List<cSock> clientSocketList;
+
     private Socket client;
     private ServerLog serverLog;
     private String remoteClientString;
     private DataOutputStream serverToClient;
     private DataInputStream clientToServer;
+    private PacketsManager packetsManager;
+
+
     cSock(ServerLog serverLog, List<cSock> clientSocketList, Socket client)
     {
         this.client = client;
         this.serverLog = serverLog;
-        this.clientSocketList = clientSocketList;
-        this.serverLog.log("cSock(ServerLog serverLog, List<Socket> clientSocketList, Socket client);");
-        this.remoteClientString = formatSockAddr(client.getRemoteSocketAddress());
-        setupStream(BuffType.BREADER);
         setupStream(BuffType.BRITER);
+        setupStream(BuffType.BREADER);
+        packetsManager = new PacketsManager();
+        this.clientSocketList = clientSocketList;
+        this.remoteClientString = formatSockAddr(client.getRemoteSocketAddress());
     }
 
     @Override
@@ -95,6 +101,17 @@ public class cSock extends Thread
         /*
             The packet start with an int then there is the data (so here we have data only, the int is read in the reading loop)
 
+            1)server parte
+            2) client si connette e manda nick + pwd
+            3) server controlla se:
+                nick è connesso
+                    se è connesso risponde di cambiare nick
+                    se non è connesso controlla se è nel db dei nick registrati
+                        se è nel db usa la pwd
+                            se la pwd è sbagliata avvisa di cambiarla
+            4) se loggato (anonimo o registrato) usa setnick su this
+
+
             0x01 iD message  <- send a (public/private) message (string) to iD (int)
                 lurka se iD è un chan o un nick online
                     se online invia 0x01 0x01 message
@@ -113,33 +130,49 @@ public class cSock extends Thread
             emoji bho farei supporto limitato al posto che tutti almeno uso i byte non usati dai char nelle string oppure è meglio usare stringhe unicode bho
         */
 
-        System.out.println("data: " + new String(data));
-        switch (data[0])
+        serverLog.data(new String(data));
+        DecodedDataFromClient decodedData = packetsManager.decode(PacketType.FROMCLIENT, data);
+        serverLog.data(decodedData.toString());
+
+        switch (decodedData.command)
         {
-            case 0x01:
+            case INIT:
             {
+                serverLog.data("INIT [version] " + decodedData.version);
                 break;
             }
-            case 0x02:
-            {
+            case REGISTER:
+                serverLog.data("REGISTER [email] " + decodedData.mail + " [password] " + decodedData.pwd);
                 break;
-            }
+            case MESSAGE:
+                serverLog.data("MESSAGE [to] " + decodedData.receiver + " [msg] " + decodedData.message);
+                break;
+            case SEND:
+                serverLog.data("SEND [to] " + decodedData.receiver + " [fileName] " + decodedData.fileName + " [fileSize] " + decodedData.fileSize);
+                break;
+            case NICK:
+                serverLog.data("NICK [nick] " + decodedData.nick);
+                break;
+            case QUIT:
+                serverLog.data("QUIT [message] " + decodedData.message);
+                break;
         }
     }
 
     @Override
     public void run()
     {
-        serverLog.log("run() [" + remoteClientString + "]");
         synchronized (clientSocketList)
         {
             clientSocketList.add(this);
+            serverLog.log("New client connected: [" + remoteClientString + "] Total: (" + clientSocketList.size() + ")");
         }
-        serverLog.log("New client connected: [" + remoteClientString + "] Total: (" + clientSocketList.size() + ")");
 
         byte[] data = null;
         int totalDataSize = 0;
         int currentDataSize = 0;
+
+        //TODO ping init
 
         while (!isInterrupted())
         {
@@ -148,12 +181,16 @@ public class cSock extends Thread
                 try
                 {
                     totalDataSize = clientToServer.readInt();
-                    System.out.printf("totalDataSize [%d]\r\n", totalDataSize);
+                    serverLog.data("totalDataSize = " + totalDataSize);
+                    if (totalDataSize < 0)
+                    {
+                        throw new IOException("fail");
+                    }
                     data = new byte[totalDataSize];
                 } catch (IOException e)
                 {
                     // EOF, disconnect/wrong data
-                    readingLoopFail("r(int)");
+                    readingLoopFail("r(totalDataSize)");
                 }
             } else
             {
@@ -161,17 +198,16 @@ public class cSock extends Thread
                 try
                 {
                     bytesRead = clientToServer.read(data, currentDataSize, totalDataSize - currentDataSize);
-                    if (bytesRead < 0)
+                    serverLog.data("currentDataSize = " + currentDataSize + "\tbytesRead = " + bytesRead);
+                    if ((bytesRead > 0) && ((currentDataSize += bytesRead) == totalDataSize))
+                        {
+                            serverLog.data("currentDataSize = " + currentDataSize + "\tbytesRead = " + bytesRead);
+                            decodeData(data);
+                            currentDataSize = 0;
+                            totalDataSize = 0;
+                    } else if (bytesRead < 0)
                     {
                         throw new IOException("EOF");
-                    }
-                    currentDataSize += bytesRead;
-                    if (currentDataSize == totalDataSize)
-                    {
-                        System.out.printf("Data [%s]\tSize (%d)\tTotalRead(%d)\r\n", new String(data), bytesRead, totalDataSize);
-                        decodeData(data);
-                        currentDataSize = 0;
-                        totalDataSize = 0;
                     }
                 } catch (IOException e)
                 {
@@ -223,5 +259,10 @@ public class cSock extends Thread
                 }
             }
         }
+    }
+
+    enum BuffType
+    {
+        BREADER, BRITER
     }
 }
